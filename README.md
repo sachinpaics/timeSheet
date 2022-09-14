@@ -25,7 +25,9 @@ ____________
 
 To run the frontend:
 >> cd frontend/
+
 >> yarn install
+
 >> yarn start
 ____________
 ____________
