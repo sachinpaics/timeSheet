@@ -28,6 +28,8 @@ To run the backend:
 
 $ source venv/bin/activate
 
+$ pip3 install -r requirements.txt
+
 $ python3 backend/app.py
 
 ____________
