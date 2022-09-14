@@ -12,23 +12,23 @@ Backend - Flask, SqlAlchemy, redis
 ___________
 This app uses redis to manage user sessions
 Please make sure redis is installed and running
->> sudo service redis-server start
+$ sudo service redis-server start
 ____________
 Please use an virual environment and install the requirements.txt
->> pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 ____________
 ____________
 To run the backend:
->> source venv/bin/activate
->> python3 backend/app.py
+$ source venv/bin/activate
+$ python3 backend/app.py
 ____________
 
 To run the frontend:
->> cd frontend/
+$ cd frontend/
 
->> yarn install
+$ yarn install
 
->> yarn start
+$ yarn start
 ____________
 ____________
 
