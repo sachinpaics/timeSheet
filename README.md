@@ -6,24 +6,34 @@
  */
  __________
 Attendance Application using Flask and React
+
 Major Dependencies:
+
 Frontend - antd, moment
+
 Backend - Flask, SqlAlchemy, redis
+
 ___________
 This app uses redis to manage user sessions
 Please make sure redis is installed and running
+
 $ sudo service redis-server start
 ____________
 Please use an virual environment and install the requirements.txt
+
 $ pip3 install -r requirements.txt
 ____________
 ____________
 To run the backend:
+
 $ source venv/bin/activate
+
 $ python3 backend/app.py
+
 ____________
 
 To run the frontend:
+
 $ cd frontend/
 
 $ yarn install
@@ -35,8 +45,10 @@ ____________
 Python API Documentation for reference:
 ____________
 Auth API'S
+
 The user session's userId will be used for the API calls.
-The password's are base64 encoded for this demo. 
+
+The password's are base64 encoded for this POC. 
 ___________
 Register user:
 
