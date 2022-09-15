@@ -194,7 +194,7 @@ const CurrentTimeSheet = () => {
                 var minutesDiff = (endTime.diff(beginningTime, 'minutes')) % 60;
                 let minutesDiffStr
 
-                if (hoursDiff > 24) {
+                if (hoursDiff >= 24) {
                     alert('Time validation failed, please check the dates!')
                     return;
                 }
