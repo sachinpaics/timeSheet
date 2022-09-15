@@ -20,9 +20,13 @@ ____________
 
 Flow of the UI :
 LandingPage -> Register ->Login
+
 ---> User details
+
 ---> Edit Current Week TimeSheet 
+
 ---> Check Old Attendance Records 
+
 --->Logout
 
 ____________
