@@ -90,16 +90,12 @@ const CurrentTimeSheet = () => {
                     return (
                         <Form.Item
                             name="time-picker-in" {...timeConfig}
-                        // initialValue={moment(date + " 00:00", "DD/MM/YYYY HH:mm")}
                         >
-                            {/* <TimePicker format={timeFormat} /> */}
                             <DatePicker format="DD/MM/YYYY HH:mm"
                                 name='punch-in'
                                 showTime
                                 size='small'
-                                // disabledDate={disabledDate} 
                                 disabledDate={(current) => {
-                                    console.log('Test', current)
                                     let customDate = moment(record.date, "DD/MM/YYYY")
                                     return current && (current < customDate || current > customDate.add(1, 'days'));
                                 }} />
@@ -119,18 +115,13 @@ const CurrentTimeSheet = () => {
                     return (
                         <Form.Item
                             name="time-picker-out" {...timeConfig}
-                        // initialValue={moment(date + " 00:00", "DD/MM/YYYY HH:mm")}
                         >
-                            {/* <TimePicker format={timeFormat} /> */}
                             <DatePicker
                                 name='punch-out'
                                 format="DD/MM/YYYY HH:mm"
                                 showTime
                                 size='small'
-                                // disabledDate={disabledDate} 
-                                // defaultPickerValue={moment(record.date, 'DD/MM/YYYY')}
                                 disabledDate={(current) => {
-                                    console.log('Test', current)
                                     let customDate = moment(record.date, "DD/MM/YYYY")
                                     return (current < customDate || current > customDate.add(2, 'days'));
                                 }}
@@ -156,7 +147,6 @@ const CurrentTimeSheet = () => {
                         size='small'
                         type="dashed" onClick={
                             () => {
-                                console.log(record)
                                 setEditingRow(record.id);
                                 form.setFieldsValue({
                                     punch_in: record.punch_in,
@@ -167,7 +157,7 @@ const CurrentTimeSheet = () => {
                     >Edit</Button>
 
                     <Divider type='vertical'></Divider>
-                    <Button name="save" type="primary" htmlType="submit">
+                    <Button shape='round' name="save" type="primary" htmlType="submit">
                         Set
                     </Button>
                 </>
@@ -192,10 +182,10 @@ const CurrentTimeSheet = () => {
                     return;
                 }
             }
-            const updatedDataSource: any = [...tableData];
+            let updatedDataSource: any = [...tableData];
 
             if (editingRow !== null && updatedDataSource !== undefined) {
-                let currEditingRow = editingRow % 7
+                let currEditingRow = editingRow % 7 === 0 ? 7 : editingRow % 7
                 let beginningTime = values['time-picker-in']
                 let endTime = values['time-picker-out']
 
@@ -309,3 +299,4 @@ const CurrentTimeSheet = () => {
 }
 
 export default CurrentTimeSheet
+
