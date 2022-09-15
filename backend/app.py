@@ -6,9 +6,9 @@ from config import ApplicationConfig
 from models import Attendance, db, User
 import datetime
 import base64
+import logging
 
-
-### UTILS ###
+# UTILS
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
@@ -20,8 +20,11 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+log_file_name = datetime.datetime.today().strftime("%m.%d.%Y")
+logging.basicConfig(filename=f'{log_file_name}.log',
+                    encoding='utf-8', level=logging.DEBUG)
+# AUTH API'S
 
-######## AUTH API'S ###
 
 @app.route("/@me")
 def get_current_user():
@@ -30,11 +33,13 @@ def get_current_user():
         user_id = session.get("user_id")
 
         if not user_id:
+            logging.warning("401: Unauthorized request made")
             return jsonify({
                 "error": "Unauthorized"
             }), 401
 
         user = User.query.filter_by(id=user_id).first()
+
         return jsonify({
             "id": user.id,
             "email": user.email,
@@ -42,6 +47,7 @@ def get_current_user():
             "last_name": user.last_name
         })
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -79,6 +85,7 @@ def register_user():
             "email": new_user.email
         })
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -86,7 +93,8 @@ def register_user():
 
 @app.route("/login", methods=["POST"])
 def login_user():
-    # This api is used to login and create a session of an existing user.
+    # This api is used to login and
+    # create a session of an existing user.
     try:
         try:
             email = request.json["email"]
@@ -98,11 +106,11 @@ def login_user():
         user = User.query.filter_by(email=email).first()
         if user is None:
             return jsonify({
-                "error": "Unauthorized"
+                "error": "User doesnot exist"
             }), 401
         if not bcrypt.check_password_hash(user.password, email+password):
             return jsonify({
-                "error": "Unauthorized"
+                "error": "Email/password donot match in the records"
             }), 401
         session["user_id"] = user.id
         return jsonify({
@@ -110,6 +118,7 @@ def login_user():
             "email": user.email
         })
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -117,20 +126,25 @@ def login_user():
 
 @app.route("/logout", methods=["POST"])
 def logout_user():
-    # This method is responsible for killing the user session to log the user out.
+    # This method is responsible for killing
+    # the user session to log the user out.
     try:
+        user_id = session.get("user_id")
+        logging.info(f"{user_id} logged out")
         session.pop("user_id")
         return "200"
     except Exception as e:
+        logging.warning("No session was found")
         return jsonify({
             "error": "No session was active"
         }), 400
 
 
-### TIME-SHEET API'S###
+# TIME-SHEET API'S
 
 def get_current_week_dates():
-    # This method reurns a list of array for the ongoing week.
+    # This method reurns a list
+    # of array for the ongoing week.
     try:
         today = datetime.date.today()
         days = [(today + (datetime.timedelta(days=i))).strftime("%d/%m/%Y")
@@ -141,7 +155,8 @@ def get_current_week_dates():
 
 
 def get_week():
-    # This method is returns the list of dict with date and its corresponding day.
+    # This method is returns the list of dict
+    # with date and its corresponding day.
     try:
         days_of_week = [
             "MONDAY", "TUESDAY", "WEDNESDAY",
@@ -151,16 +166,17 @@ def get_week():
         days = get_current_week_dates()
         weekly = list()
         for i in range(len(days)):
-            weekly.append(
-                {"day": days_of_week[i], "date": days[i]})
+            weekly.append({"day": days_of_week[i], "date": days[i]})
         return weekly
     except Exception as e:
+        logging.error(e)
         return e
 
 
 @app.route("/setAttendance", methods=['POST'])
 def set_attendance():
-    # This function is used for persistantly saving the timesheet for the ongoing week.
+    # This function is used for persistantly
+    # saving the timesheet for the ongoing week.
     try:
         try:
             user_id = session.get("user_id")
@@ -185,7 +201,8 @@ def set_attendance():
             duration = res['duration']
             week_num = res['week_num']
             record_attendance = Attendance(
-                email=email, day=day, date=date, punch_in=punch_in, punch_out=punch_out, duration=duration, week_num=week_num)
+                email=email, day=day, date=date, punch_in=punch_in,
+                punch_out=punch_out, duration=duration, week_num=week_num)
             record_exists = Attendance.query.filter_by(
                 email=email, date=date).first() is not None
             if record_exists:
@@ -201,6 +218,7 @@ def set_attendance():
                 db.session.commit()
         return jsonify(time_list)
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -208,7 +226,8 @@ def set_attendance():
 
 @app.route("/initCurrWeekAttendance", methods=['GET'])
 def init_attendance():
-    # This function initiates the timesheet for the current week of the logged in user or a new user.
+    # This function initiates the timesheet for the
+    # current week of the logged in user or a new user.
     try:
         week_num = datetime.date.today().isocalendar()[1]
         start_time = '00:00'
@@ -230,11 +249,13 @@ def init_attendance():
             punch_out = end_time
             duration = "00:00"
             record_attendance = Attendance(
-                email=email, day=day, date=date, punch_in=punch_in, punch_out=punch_out, duration=duration, week_num=week_num)
+                email=email, day=day, date=date, punch_in=punch_in,
+                punch_out=punch_out, duration=duration, week_num=week_num)
             db.session.add(record_attendance)
             db.session.commit()
         return '200'
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -242,7 +263,8 @@ def init_attendance():
 
 @app.route("/getAttendance", methods=['GET'])
 def get_attendance():
-    # This function returns all the records from previous weeks for the logged in user, if it exists.
+    # This function returns all the records from
+    # previous weeks for the logged in user, if it exists.
     try:
         week_num = datetime.date.today().isocalendar()[1]
         try:
@@ -269,6 +291,7 @@ def get_attendance():
             })
         return jsonify(attendance_week)
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -276,7 +299,8 @@ def get_attendance():
 
 @app.route("/getLatestAttendance", methods=['GET'])
 def get_latest_attendance():
-    # This method returns the attendance for the current week for the logged in user.
+    # This method returns the attendance for the
+    # current week for the logged in user.
     try:
         week_num = datetime.date.today().isocalendar()[1]
         try:
@@ -307,6 +331,7 @@ def get_latest_attendance():
             })
         return jsonify(attendance_week)
     except Exception as e:
+        logging.error(e)
         return jsonify({
             "error": e
         }), 500
@@ -314,7 +339,6 @@ def get_latest_attendance():
 
 @app.route("/")
 def main():
-    print("Main program")
     print("The program has started successfully")
     print("You can now run the react app and use the API's")
     return "Flask app is up and running"

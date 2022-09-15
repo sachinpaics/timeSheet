@@ -25,8 +25,8 @@ class User(db.Model):
 
 class Attendance(db.Model):
     __table__name = "attendance"
-    id = db.Column(db.Integer, db.Sequence('attendance_id', start=0, increment=1),
-                   primary_key=True)
+    id = db.Column(db.Integer, db.Sequence('attendance_id', start=0,
+                                           increment=1), primary_key=True)
     email = db.Column(db.String(32), db.ForeignKey('user.email'))
     date = db.Column(db.String(10), default=None)
     day = db.Column(db.String(10), default=None)
