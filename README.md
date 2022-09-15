@@ -5,11 +5,30 @@
  * @desc [Attendance TimeSheet POC]
  */
  __________
-Attendance Application using Flask and React
+Attendance Application using Flask and React:
 
+Requirements:-
+Create a Flask, SQLite and React application that allows a user (based on an email) to submit a start
+and end time each day for a working week that starts on Monday and ends on Sunday. 
+The times should be based on a 24-hour clock and the UI should validate that the end time occurs
+after the start time. 
+The appearance can be basic but some standard form styling should be used to make the fields
+appear consistent. 
+You may use any persistence strategy but SQLAlchemy would be preferred.
+
+____________
+
+Flow of the UI :
+LandingPage -> Register ->Login
+---> User details
+---> Edit Current Week TimeSheet 
+---> Check Old Attendance Records 
+--->Logout
+
+____________
 Major Dependencies:
 
-Frontend - antd, moment
+Frontend - antd, moment(optional)
 
 Backend - Flask, SqlAlchemy, redis
 
