@@ -314,6 +314,7 @@ def get_latest_attendance():
 
 @app.route("/")
 def main():
+    print("Main program")
     print("The program has started successfully")
     print("You can now run the react app and use the API's")
     return "Flask app is up and running"
