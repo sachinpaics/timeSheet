@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import 'antd/dist/antd.min.css'
 import httpClient from '../httpClient';
-import { Button, Divider, Form, Spin, Table, TimePicker, Typography } from 'antd';
+import { Button, DatePicker, Divider, Form, Spin, Table, Typography } from 'antd';
 import moment from 'moment';
 import { User, DataType } from '../types';
 import { host, Title } from '..';
@@ -10,12 +10,18 @@ import { BackwardFilled, EditTwoTone, HistoryOutlined, LoginOutlined, UploadOutl
 const { Text } = Typography;
 
 
+moment.locale('en-gb', {
+    week: {
+        dow: 1
+    }
+})
+
 const CurrentTimeSheet = () => {
     const [tableData, setTableData] = useState([])
     const [user, setUser] = useState<User | null>(null)
     const [editingRow, setEditingRow] = useState<any | null>(null);
     const [form] = Form.useForm();
-    const timeFormat = 'HH:mm';
+    // const timeFormat = "DD/MM/YYYY HH:mm";
 
     const logOutUser = async () => {
         await httpClient.post("//" + host + "/logout")
@@ -23,8 +29,12 @@ const CurrentTimeSheet = () => {
     }
 
     const timeConfig = {
-        rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
-    };
+        rules: [{ type: 'object' as any, required: true, message: 'Please select time!' }],
+    }
+
+    // const disabledDate: RangePickerProps['disabledDate'] = current => {
+    //     return (current < moment().startOf('week')) || current > moment().endOf('week');
+    // }
 
     var setTableConfig = {
         method: 'post',
@@ -58,6 +68,7 @@ const CurrentTimeSheet = () => {
         getJson();
     }, []);
 
+
     const columns = [
         {
             title: 'DATE',
@@ -75,13 +86,23 @@ const CurrentTimeSheet = () => {
             key: 'punch_in',
             render: (text: any, record: DataType) => {
                 if (editingRow === record.id) {
+                    console.log(record.date)
                     return (
                         <Form.Item
                             name="time-picker-in" {...timeConfig}
-                            hasFeedback
-                            validateStatus="success"
-                            initialValue={moment('00:00', timeFormat)}>
-                            <TimePicker format={timeFormat} />
+                        // initialValue={moment(date + " 00:00", "DD/MM/YYYY HH:mm")}
+                        >
+                            {/* <TimePicker format={timeFormat} /> */}
+                            <DatePicker format="DD/MM/YYYY HH:mm"
+                                name='punch-in'
+                                showTime
+                                size='small'
+                                // disabledDate={disabledDate} 
+                                disabledDate={(current) => {
+                                    console.log('Test', current)
+                                    let customDate = moment(record.date, "DD/MM/YYYY")
+                                    return current && (current < customDate || current > customDate.add(1, 'days'));
+                                }} />
                         </Form.Item>
                     );
                 } else {
@@ -98,10 +119,23 @@ const CurrentTimeSheet = () => {
                     return (
                         <Form.Item
                             name="time-picker-out" {...timeConfig}
-                            hasFeedback
-                            validateStatus="success"
-                            initialValue={moment('00:00', timeFormat)}>
-                            <TimePicker format={timeFormat} />
+                        // initialValue={moment(date + " 00:00", "DD/MM/YYYY HH:mm")}
+                        >
+                            {/* <TimePicker format={timeFormat} /> */}
+                            <DatePicker
+                                name='punch-out'
+                                format="DD/MM/YYYY HH:mm"
+                                showTime
+                                size='small'
+                                // disabledDate={disabledDate} 
+                                // defaultPickerValue={moment(record.date, 'DD/MM/YYYY')}
+                                disabledDate={(current) => {
+                                    console.log('Test', current)
+                                    let customDate = moment(record.date, "DD/MM/YYYY")
+                                    return (current < customDate || current > customDate.add(2, 'days'));
+                                }}
+
+                            />
                         </Form.Item>
                     );
                 } else {
@@ -118,15 +152,21 @@ const CurrentTimeSheet = () => {
             'title': 'ACTIONS',
             render: (_: any, record: DataType) => {
                 return <>
-                    <Button type="dashed" onClick={() => {
-                        setEditingRow(record.id);
-                        form.setFieldsValue({
-                            punch_in: record.punch_in,
-                            punch_out: record.punch_out
-                        });
-                    }}
+                    <Button
+                        size='small'
+                        type="dashed" onClick={
+                            () => {
+                                console.log(record)
+                                setEditingRow(record.id);
+                                form.setFieldsValue({
+                                    punch_in: record.punch_in,
+                                    punch_out: record.punch_out
+                                });
+                            }}
                         icon={<EditTwoTone />}
                     >Edit</Button>
+
+                    <Divider type='vertical'></Divider>
                     <Button name="save" type="primary" htmlType="submit">
                         Set
                     </Button>
@@ -139,14 +179,16 @@ const CurrentTimeSheet = () => {
         total = tableData.length / 7
     }
 
-
     const onFinish = (values: any) => {
         try {
             if (values !== null && values !== undefined && Object.keys(values).length > 0) {
+                console.log(values)
                 let beginningTime = values['time-picker-in'];
                 let endTime = values['time-picker-out']
+
+
                 if (!beginningTime.isBefore(endTime)) {
-                    alert('Time validation failed, punch out cannot be before punch in!')
+                    alert('Time validation failed, punch out should be after punch in!')
                     return;
                 }
             }
@@ -162,18 +204,23 @@ const CurrentTimeSheet = () => {
                 var minutesDiff = (endTime.diff(beginningTime, 'minutes')) % 60;
                 let minutesDiffStr
 
+                if (hoursDiff > 24) {
+                    alert('Time validation failed, please check the dates!')
+                    return;
+                }
+
                 if (minutesDiff < 10 && minutesDiff !== null) {
                     minutesDiffStr = '0' + minutesDiff.toString()
                 }
                 else {
-                    minutesDiffStr = minutesDiff.toString()
+                    minutesDiffStr = (minutesDiff).toString()
                 }
 
                 let currData = updatedDataSource[currEditingRow - 1]
 
                 updatedDataSource.splice(currEditingRow - 1, 1, {
-                    punch_in: values['time-picker-in'].format(timeFormat),
-                    punch_out: values['time-picker-out'].format(timeFormat),
+                    punch_in: values['time-picker-in'].format("HH:mm"),
+                    punch_out: values['time-picker-out'].format("HH:mm"),
                     id: editingRow,
                     date: currData['date'],
                     day: currData['day'],
@@ -186,7 +233,7 @@ const CurrentTimeSheet = () => {
             }
         }
         catch (error: any) {
-            console.log("Something went wrong while setting the attendance values.")
+            console.log("Something went wrong while setting the attendance values.", error)
         }
     };
 
@@ -199,8 +246,11 @@ const CurrentTimeSheet = () => {
             .then(function (response) {
                 setTableData(response.data);
                 window.location.reload()
+                alert("Attendance saved")
             })
             .catch(function (error) {
+                alert("Failed to save the data!")
+                window.location.reload()
                 console.log(error);
             });
     }
