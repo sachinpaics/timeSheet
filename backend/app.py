@@ -176,7 +176,7 @@ def set_attendance():
         except Exception as e:
             return jsonify({
                 "error": "Please validate your request body"
-            }), 400    
+            }), 400
         for res in time_list:
             day = res['day']
             date = res['date']
@@ -312,6 +312,14 @@ def get_latest_attendance():
         }), 500
 
 
+@app.route("/")
+def main():
+    print("The program has started successfully")
+    print("You can now run the react app and use the API's")
+    return "Flask app is up and running"
+
+
 if __name__ == "__main__":
     app.debug = True
+    main()
     app.run()
