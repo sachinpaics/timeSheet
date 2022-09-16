@@ -5,7 +5,7 @@ import { Button, DatePicker, Divider, Form, Spin, Table, Typography } from 'antd
 import moment from 'moment';
 import { User, DataType } from '../types';
 import { host, Title } from '..';
-import { BackwardFilled, EditTwoTone, HistoryOutlined, LoginOutlined, UploadOutlined } from '@ant-design/icons';
+import { BackwardFilled, CloseOutlined, EditTwoTone, HistoryOutlined, LoginOutlined, UploadOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -142,6 +142,7 @@ const CurrentTimeSheet = () => {
         {
             'title': 'ACTIONS',
             render: (_: any, record: DataType) => {
+                if (editingRow===null){
                 return <>
                     <Button
                         size='small'
@@ -155,12 +156,26 @@ const CurrentTimeSheet = () => {
                             }}
                         icon={<EditTwoTone />}
                     >Edit</Button>
+                    <Divider type='vertical'></Divider></>
+                }
+                else{
+                    return <>
+                    <Button
+                        danger
+                        size='small'
+                        type="ghost" onClick={
+                            () => {
+                                setEditingRow(null);
+                            }}
+                        icon={<CloseOutlined />}
+                    >Cancel</Button>
 
                     <Divider type='vertical'></Divider>
                     <Button shape='round' name="save" type="primary" htmlType="submit">
                         Set
                     </Button>
                 </>
+                        }
             }
         }]
 
