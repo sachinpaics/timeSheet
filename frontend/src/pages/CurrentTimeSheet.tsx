@@ -158,9 +158,10 @@ const CurrentTimeSheet = () => {
                     >Edit</Button>
                     <Divider type='vertical'></Divider></>
                 }
-                else{
+                else if (editingRow===record.id){
                     return <>
                     <Button
+                    disabled={editingRow!==record.id}
                         danger
                         size='small'
                         type="ghost" onClick={
@@ -171,7 +172,12 @@ const CurrentTimeSheet = () => {
                     >Cancel</Button>
 
                     <Divider type='vertical'></Divider>
-                    <Button shape='round' name="save" type="primary" htmlType="submit">
+                    <Button 
+                    disabled={editingRow!==record.id}
+                    shape='round' 
+                    name="save" 
+                    type="primary" 
+                    htmlType="submit">
                         Set
                     </Button>
                 </>
